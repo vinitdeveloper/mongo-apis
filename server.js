@@ -17,8 +17,10 @@ app.get('/', (req, res) => {
 
 
 const documentRouter = require('./routes/documents')
+const hitRouter = require('./routes/hits')
 
 app.use('/document', documentRouter );
+app.use('/hit', hitRouter );
 
 
 // server start

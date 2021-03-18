@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// create student schema & model
+// create document schema & model
 const DocumentSchema = new Schema({
     record_id: {
         type: String,

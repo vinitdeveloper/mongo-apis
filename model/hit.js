@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// create student schema & model
+// create hit schema & model
 const HitSchema = new Schema({
     record_id: {
         type: String,
@@ -18,5 +18,5 @@ const HitSchema = new Schema({
     }
 });
 
-const Hit = mongoose.model('hits',HitSchema);
+const Hit = mongoose.model('hit',HitSchema);
 module.exports = Hit;

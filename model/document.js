@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 const DocumentSchema = new Schema({
     record_id: {
         type: String,
+        required: true
     },
     field1: {
         type: String,

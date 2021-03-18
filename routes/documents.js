@@ -32,7 +32,7 @@ router.delete('/:id', (req, res) => {
     });
 })
 
-// Get all documents
+// Get all 10 latest documents
 router.get('/', (req, res, next) => {
     Document.find({}).sort({ _id: -1 }).limit(10).then(function(documents){
         res.send(documents);

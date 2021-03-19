@@ -23,14 +23,26 @@ router.post('/', (req, res) => {
             throw err
 
         if(result.length > 0){
-            
-            var newvalues = { $set: { count : result[0].count + 1 } };
-            db.collection("hits").updateOne(where, newvalues, (err, result) => {
-                if (err)
+
+            var whereDoc = { record_id: req.body.record_id };
+
+            db.collection("documents").find(whereDoc).toArray((err, resultCount) => {
+                if (err){
                     throw err
-                res.send({
-                    record_id: req.body.record_id
-                })
+                }else{
+
+                    var incrementCounted = { $set:{ count : resultCount[0].count + 1 } };
+        
+                    db.collection("documents").updateOne(whereDoc, incrementCounted, (err, result) => {
+                        if (err)
+                            throw err
+                        res.send({
+                            record_id: req.body.record_id
+                        })
+                    });
+
+                }
+
             });
 
         }else{
@@ -38,16 +50,41 @@ router.post('/', (req, res) => {
             var insertData = { 
                                 record_id: req.body.record_id, 
                                 session_id: req.body.session_id,
-                                count: 0, 
                                 timestamp: Date() 
                              };
             
             db.collection("hits").insertOne(insertData, (err, result) => {
-                if (err)
-                    throw err
-                res.send({
-                    record_id: req.body.record_id
-                })
+                if (err){
+                    res.send({
+                        statuscode : 0,
+                        message : 'failed'
+                    })
+                }
+                else{
+
+                    var whereDoc = { record_id: req.body.record_id };
+
+                    db.collection("documents").find(whereDoc).toArray((err, resultCount) => {
+                        if (err){
+                            throw err
+                        }else{
+
+                            var incrementCounted = { $set:{ count : resultCount[0].count + 1 } };
+        
+                            db.collection("documents").updateOne(whereDoc, incrementCounted, (err, result) => {
+                                if (err)
+                                    throw err
+                                res.send({
+                                    record_id: req.body.record_id
+                                })
+                            });
+
+                        }
+
+                    });
+            
+                }
+               
             });
 
         }

@@ -22,7 +22,9 @@ router.post('/', (req, res) => {
         if (err)
             throw err
 
-        if(result.length !== 0){
+        if(result.length > 0){
+
+            req.body.count = result[0].count + 1;
             
             var myquery = { record_id: req.body.record_id };
             var newvalues = { $set: req.body };
@@ -35,6 +37,9 @@ router.post('/', (req, res) => {
             });
 
         }else{
+            
+            req.body.count = 0
+            req.body.timestamp = Date()
             
             db.collection("documents").insertOne(req.body, (err, result) => {
                 if (err)

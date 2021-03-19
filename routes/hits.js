@@ -1,43 +1,82 @@
 const express = require('express')
 const router = express.Router()
 
-const Hit = require('../model/hit');
+const mongodb = require('mongodb')
 
+let db
 
-// Create one hit
-router.post('/', (req, res, next) => {
-    Hit.create(req.body).then(function(hit){
-        res.send({
-            record_id: hit.record_id
-        });
-    }).catch(next);
-})
+mongodb.connect(
+  process.env.DATABASE_URL,
+  { useNewUrlParser: true, useUnifiedTopology: true },
+  function (err, client) {
+    db = client.db()
+  }
+)
 
-// Update one hit
-router.put('/:id', (req, res) => {
+// Create one document
+router.post('/', (req, res) => {
 
-    Hit.findOne({record_id: req.params.id}).then(function(hit){
-        Hit.update({record_id: req.params.id}, {count: hit.count + 1 } ).then(function(hit){
-            res.send({
-                record_id: req.params.id
+    var where = { record_id: req.body.record_id, session_id: req.body.session_id };
+
+    db.collection("hits").find(where).toArray((err, result) => {
+        if (err)
+            throw err
+
+        if(result.length > 0){
+            
+            var newvalues = { $set: { count : result[0].count + 1 } };
+            db.collection("hits").updateOne(where, newvalues, (err, result) => {
+                if (err)
+                    throw err
+                res.send({
+                    record_id: req.body.record_id
+                })
             });
-        });
+
+        }else{
+
+            var insertData = { 
+                                record_id: req.body.record_id, 
+                                session_id: req.body.session_id,
+                                count: 0, 
+                                timestamp: Date() 
+                             };
+            
+            db.collection("hits").insertOne(insertData, (err, result) => {
+                if (err)
+                    throw err
+                res.send({
+                    record_id: req.body.record_id
+                })
+            });
+
+        }
+        
     });
 
 })
 
-// Get all 10 latest hit
-router.get('/', (req, res, next) => {
-    Hit.find({}).sort({ _id: -1 }).limit(10).then(function(hits){
-        res.send(hits);
-    }).catch(next);
-})
-
-// Get one hit
-router.get('/:id', (req, res) => {
-    Hit.findOne({record_id: req.params.id}).then(function(hit){
-        res.send(hit);
+// Get all 10 latest documents
+router.get('/', (req, res) => {
+    db.collection("hits").find().sort({ _id: -1 }).limit(10).toArray((err, result) => {
+        if (err)
+            throw err
+        res.send(result)
     });
 })
+
+// Get single record
+router.get('/:record_id', (req, res) => {
+   
+    var where = { record_id: req.params.record_id };
+
+    db.collection("hits").find(where).toArray((err, result) => {
+        if (err)
+            throw err
+        res.send(result[0])
+    });
+
+})
+
 
 module.exports = router

@@ -1,49 +1,91 @@
 const express = require('express')
 const router = express.Router()
 
-const Document = require('../model/document');
+const mongodb = require('mongodb')
 
+let db
+
+mongodb.connect(
+  process.env.DATABASE_URL,
+  { useNewUrlParser: true, useUnifiedTopology: true },
+  function (err, client) {
+    db = client.db()
+  }
+)
 
 // Create one document
-router.post('/', (req, res, next) => {
-    Document.create(req.body).then(function(document){
-        res.send({
-            record_id: document.record_id
-        });
-    }).catch(next);
+router.post('/', (req, res) => {
+
+    var where = { record_id: req.body.record_id };
+
+    db.collection("documents").find(where).toArray((err, result) => {
+        if (err)
+            throw err
+
+        if(result.length !== 0){
+            
+            var myquery = { record_id: req.body.record_id };
+            var newvalues = { $set: req.body };
+            db.collection("documents").updateOne(myquery, newvalues, (err, result) => {
+                if (err)
+                    throw err
+                res.send({
+                    record_id: req.body.record_id
+                })
+            });
+
+        }else{
+            
+            db.collection("documents").insertOne(req.body, (err, result) => {
+                if (err)
+                    throw err
+                res.send({
+                    record_id: req.body.record_id
+                })
+            });
+
+        }
+        
+    });
+
 })
 
-// Update one document
-router.put('/:id', (req, res) => {
-    
-    Document.update({record_id: req.params.id}, req.body ).then(function(document){
+// delete 1 records
+router.post('/:record_id', (req, res) => {
+
+    var myquery = { record_id: req.params.record_id };
+    db.collection("documents").deleteOne(myquery, (err, result) => {
+        if (err)
+            throw err
         res.send({
-            record_id: req.params.id
-        });
+            record_id: req.params.record_id
+        })
     });
+
 })
 
-// Delete one document
-router.delete('/:id', (req, res) => {
-    Document.deleteOne({record_id: req.params.id}).then(function(document){
-        res.send({
-            record_id: req.params.id
-        });
-    });
-})
 
 // Get all 10 latest documents
-router.get('/', (req, res, next) => {
-    Document.find({}).sort({ _id: -1 }).limit(10).then(function(documents){
-        res.send(documents);
-    }).catch(next);
-})
-
-// Get one document
-router.get('/:id', (req, res) => {
-    Document.findOne({record_id: req.params.id}).then(function(document){
-        res.send(document);
+router.get('/', (req, res) => {
+    db.collection("documents").find().sort({ _id: -1 }).limit(10).toArray((err, result) => {
+        if (err)
+            throw err
+        res.send(result)
     });
 })
+
+// Get single record
+router.get('/:record_id', (req, res) => {
+   
+    var where = { record_id: req.params.record_id };
+
+    db.collection("documents").find(where).toArray((err, result) => {
+        if (err)
+            throw err
+        res.send(result[0])
+    });
+
+})
+
 
 module.exports = router

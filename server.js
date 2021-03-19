@@ -5,6 +5,15 @@ const app = express()
 
 app.use(express.json())
 
+
+app.use(function (req, res, next) {
+    if (req.headers['content-type'] !== 'application/json' && req.method === 'POST') {
+        res.status(405).send('Method Not Allowed')
+    } else {
+        next()
+    }
+})
+
 app.get('/', (req, res) => {
     res.send('Rest apis working ')
 })

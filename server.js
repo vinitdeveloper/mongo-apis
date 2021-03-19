@@ -9,7 +9,7 @@ app.use(express.json())
 app.use((req, res, next) => {
     if (req.headers['api-key'] !== "" && req.headers['api-key'] === process.env.API_KEY) {
         if (req.headers['content-type'] !== 'application/json' && req.method === 'POST') {
-            res.status(405).send('Method Not Allowed')
+            res.status(405).send({ message: 'Method Not Allowed' })
         } else {
             next()
         }

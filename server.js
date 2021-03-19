@@ -6,11 +6,15 @@ const app = express()
 app.use(express.json())
 
 
-app.use(function (req, res, next) {
-    if (req.headers['content-type'] !== 'application/json' && req.method === 'POST') {
-        res.status(405).send('Method Not Allowed')
+app.use((req, res, next) => {
+    if (req.headers['api-key'] !== "" && req.headers['api-key'] === process.env.API_KEY) {
+        if (req.headers['content-type'] !== 'application/json' && req.method === 'POST') {
+            res.status(405).send('Method Not Allowed')
+        } else {
+            next()
+        }
     } else {
-        next()
+        res.status(400).send({ message: 'invalid Api key' })
     }
 })
 

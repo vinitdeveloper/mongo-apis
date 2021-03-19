@@ -107,10 +107,23 @@ router.get('/:record_id', (req, res) => {
    
     var where = { record_id: req.params.record_id };
 
-    db.collection("hits").find(where).toArray((err, result) => {
-        if (err)
+    db.collection("documents").find(where).toArray((err, resultCount) => {
+        if (err){
             throw err
-        res.send(result[0])
+        }else{
+
+            let documentCountAll = resultCount[0].count
+
+            db.collection("hits").find(where).sort({ _id: -1 }).limit(10).toArray((err, result) => {
+                if (err)
+                    throw err
+                res.send({
+                    count : documentCountAll,
+                    hits : result
+                })
+            });
+
+        }
     });
 
 })

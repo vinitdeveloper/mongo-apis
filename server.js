@@ -1,4 +1,4 @@
-require('dotenv').config()
+// require('dotenv').config()
 
 const express = require('express')
 const app = express()
@@ -23,11 +23,11 @@ app.get('/', (req, res) => {
 })
 
 
-const documentRouter = require('./routes/documents')
-const hitRouter = require('./routes/hits')
+// const documentRouter = require('./routes/documents')
+// const hitRouter = require('./routes/hits')
 
-app.use('/document', documentRouter );
-app.use('/hits', hitRouter );
+// app.use('/document', documentRouter );
+// app.use('/hits', hitRouter );
 
 
 // server start
